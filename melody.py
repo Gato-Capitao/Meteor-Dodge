@@ -138,13 +138,15 @@ while True:
         parte.append(resto)
         
         ultima = mao
-        
 
     except EOFError:
         if len(parte) > 0:
             linha = ajustarParte(parte, limpar)
             partitura[mao].append(linha)
         break
+    
+    except:
+        continue
 
 
 #Conveter as notas da partitura para um texto com a sintaxe do Arduino.
