@@ -7,3 +7,10 @@ The circuit and code is available for simulation in Tinkercad as the song circui
 
 - Game: https://www.tinkercad.com/things/7a3u90URMgj
 - Song: https://www.tinkercad.com/things/5CR9DvAvyxt
+
+# More about
+You can change the design sprites to make some variation in a simple way by changing the array where the sprite is stored.
+
+
+- Convert melody: You can use the Melody script to convert a sheet type to Arduino syntax and simply replace in code.
+  - Sheet type: https://pianoletternotes.blogspot.com/2021/08/rush-e.html
