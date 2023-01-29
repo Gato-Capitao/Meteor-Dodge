@@ -20,8 +20,8 @@ Python 3.10.5
 #Configuracoes
 limpar = False#Limpa os espaços entre as notas que algumas partituras possuem, como: F-3, resulta em: F3
 
-#
-
+#Variaveis globais
+partitura = {}
 def converter(nota:str, octave:str) -> str:
     """
     Converter de letra para a sintaxe do código
@@ -102,10 +102,100 @@ def ajustarParte(partitura:list, limpar:bool = False) -> list:
     
     return definido
 
+def partituraComMaos() -> dict:
+    partitura = {
+    "RH":[],
+    "LH":[]
+        }
+    parte = []
+    ultima = ""
+    while True:
+        try:
+            #Separar entrada em variaveis
+            mao, resto = input().split(":")
+            
+            #Remover a última barra
+            resto = resto[:-1]
+            
+            #Adicionar em parte caso seja repetida
+            if(mao != ultima and ultima != "" and len(parte) > 0):
+                linha = ajustarParte(parte, limpar)
+                partitura[ultima].append(linha)
+                parte = []
+            
+            parte.append(resto)
+            
+            ultima = mao
+
+        except EOFError:
+            if len(parte) > 0:
+                linha = ajustarParte(parte, limpar)
+                partitura[mao].append(linha)
+            break
+
+        except:
+            continue
+    
+    return partitura
+
+def partituraSemMaos() -> dict:
+    partitura = {
+    "Codigo":[]
+        }
+    
+    parte = []
+    while True:
+        try:
+            #Remover a última barra
+            resto = input()
+            if(resto == ""):
+                #Adicionar a parte ajustada em partitura
+                partitura["Codigo"].append(ajustarParte(parte, limpar))
+                
+                #reseta a parte
+                parte = []
+            
+            else:
+                #Remove a última barra do resto e adiciona em parte
+                resto = resto[:-1]
+                parte.append(resto)
+
+        except EOFError:
+            if len(parte) > 0:
+                partitura["Codigo"].append(ajustarParte(parte, limpar))
+            break
+
+        except:
+            continue
+    
+    return partitura
+
+def perguntaBooleana(pergunta:str) -> bool:
+    while True:
+        resposta = input(pergunta).upper()
+        if resposta == "S":
+            return True
+            
+        elif resposta == "N":
+            return False
+        
+        print('Answer only with "S" or "N"')
+
+
 #Ler nome da melodia
 nome = input("Melody name(Do not use special characters): ")
+
+#Ler se quer que retire os espaços da música
+limpar = perguntaBooleana("Do you want to delete the spaces between the notes[S/N]:")
+
+#Ler se a música contém maos
+bMaos = perguntaBooleana("Does the music sheet contain hand indexing?\nExample:\nRH:4|eeeeeeeeeeeeeeeeeeeeefeDe-|\nLH:3|--c---c---c---c---c---c---|\nAnswer[S/N]: ")
+
+#Mostrar aviso de que já pode colar o código
 print("Paste the melody and finish with EOF(Press Ctrl+Z)")
 
+#Escolher o modo de input correto
+partitura = partituraComMaos() if bMaos else partituraSemMaos()
 
 #Ler a partitura no prompt, separar os dados e armazena-los em listas
 """
@@ -115,38 +205,6 @@ Quando a mão lida é diferente da última, ele fecha aquela parte,
 Porque o mesmo momento pode usar mais de uma linha por mão.
 
 """
-partitura = {
-    "RH":[],
-    "LH":[]
-        }
-parte = []
-ultima = ""
-while True:
-    try:
-        #Separar entrada em variaveis
-        mao, resto = input().split(":")
-        
-        #Remover a última barra
-        resto = resto[:-1]
-        
-        #Adicionar em parte caso seja repetida
-        if(mao != ultima and ultima != "" and len(parte) > 0):
-            linha = ajustarParte(parte, limpar)
-            partitura[ultima].append(linha)
-            parte = []
-        
-        parte.append(resto)
-        
-        ultima = mao
-
-    except EOFError:
-        if len(parte) > 0:
-            linha = ajustarParte(parte, limpar)
-            partitura[mao].append(linha)
-        break
-    
-    except:
-        continue
 
 
 #Conveter as notas da partitura para um texto com a sintaxe do Arduino.
@@ -169,3 +227,4 @@ with open(f"{nome}.txt", "w") as arquivo:
 
 #Mostrar os dados no prompt
 print(f"Nome: {nome}\nCodigo\n{texto}")
+
