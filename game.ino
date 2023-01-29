@@ -1,6 +1,13 @@
-//Incluir bibliotecas
+/*
+Tela LCD
+*/
 #include <LiquidCrystal.h>
+LiquidCrystal lcd(2, 3, A0, A1, A2, A3);
 
+
+/*
+Musica
+*/
 //Notas para o Arduino tocar
 #define NOTE_B0  31
 #define NOTE_C1  33
@@ -92,31 +99,17 @@
 #define NOTE_D8  4699
 #define NOTE_DS8 4978
 
-//Definir constantes
-#define pier 6
-#define pControlador 4
-#define pContraste 5
-#define tamanhoTela 80
-#define x 6
-#define qntdFrames 3
-#define tCaminho 12
-#define intervaloClick 300
-#define intervaloTick 500
+//Configurações do som
 #define notasIntervalo 150
-#define moverTempo 200
+#define multiplicador 1
+unsigned long tempoNota = notasIntervalo;
+word contadorNotas = 0;
 
-//Declarar variaveis globais
-LiquidCrystal lcd(2, 3, A0, A1, A2, A3);
-unsigned int pos = 0, ajuste = 0, pontuacao = 0, recorde = 0, intervaloMover = moverTempo;
-unsigned int posM[2] = {29, 1};
-int matrizPos[2][12] = {
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-};
-bool adicionar = 0;
-unsigned long tClick = intervaloClick, tempo = 0, tMover = intervaloMover, tTick = intervaloTick, tempoNota = notasIntervalo;
+//Componentes de som
+#define pier 6//Pino do buzzer
 
-//Melodia da música
+//Melodia
+//Array com a melodia da música
 word melodia[] = {NOTE_FS5, NOTE_CS5, NOTE_FS5, NOTE_CS5, NOTE_FS5, NOTE_CS5, NOTE_FS5, NOTE_CS5, NOTE_FS5, NOTE_CS5, NOTE_FS5, NOTE_CS5, NOTE_B4,
 NOTE_A4, NOTE_CS5, 0, NOTE_A4, NOTE_B4, NOTE_E5, NOTE_DS5, NOTE_E5, NOTE_FS5, NOTE_DS5, NOTE_B4, NOTE_FS5, NOTE_B4,
 NOTE_FS5, NOTE_B4, NOTE_FS5, NOTE_B4, NOTE_FS5, NOTE_AS4, NOTE_FS5, NOTE_AS4, NOTE_G5, 0, NOTE_FS5, NOTE_D5, NOTE_FS5,
@@ -153,7 +146,49 @@ NOTE_D4, NOTE_E4, 0, NOTE_D4, NOTE_G3, 0, NOTE_D4, NOTE_E4, 0, NOTE_G4, NOTE_FS4
 NOTE_D4, 0, NOTE_A3, NOTE_A4, 0, NOTE_D4, NOTE_E4, 0, NOTE_D4, NOTE_A3, 0, NOTE_D4, NOTE_E4,
 0, NOTE_FS4, NOTE_D4};
 
-word contadorNotas = 0;
+/*
+////////////////////////////////////////////////////////////////////////////////////////
+*/
+
+/*
+Configurações do jogo
+*/
+//Tempos
+#define intervaloClick 300//Intervalo entre cliques
+#define intervaloTick 500//Intervalo entre uma aceleração no movimento do asteroide e outra
+#define moverTempo 200
+
+word intervaloMover = moverTempo;//Intervalo entre uma vez que o asteroide move e outra
+unsigned long tClick = intervaloClick, 
+tempo = 0,//Variavel que ficará com o valor de millis()
+tMover = intervaloMover,//Tempo que o asteroide move
+tTick = intervaloTick;//Tempo que o jogo acelera
+
+//Definir componentes
+#define pControlador 4
+#define pContraste 5
+
+//Configurações do jogo
+#define tamanhoTela 80
+#define x 6
+#define qntdFrames 3
+#define tCaminho 12
+
+word pos = 0, ajuste = 0, pontuacao = 0, recorde = 0;
+word posM[2] = {29, 1};//Posição do asteroide
+
+//Matriz com os frames de acordo com a posição do asteroide
+int matrizPos[2][12] = {
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+};
+
+bool adicionar = 0;//Controlador da variavel ajuste
+
+
+/*
+////////////////////////////////////////////////
+*/
 void setup()
 {
   pinMode(pContraste, OUTPUT);
@@ -169,20 +204,10 @@ void setup()
   lcd.setCursor(x+4, pos);
   lcd.write(byte(0));
 }
-void musica()
-{
-  if(tempo >= tempoNota)
-  {
-    noTone(pier);
-    tone(pier, melodia[contadorNotas], notasIntervalo);
-    tempoNota = tempo+notasIntervalo*2;
-    contadorNotas++;
-    if(contadorNotas >= sizeof(melodia)/sizeof(melodia[0]))
-    {
-      contadorNotas = 0;
-    }
-  }
-}
+
+/*
+Funções de ajuste
+*/
 void carregarLayout()
 {
   /*
@@ -207,6 +232,7 @@ void carregarLayout()
   }
   
 }
+
 
 void carregarSprites()
 {
@@ -300,6 +326,34 @@ void ajustarTabela(int pos, int valor)
   lcd.print(valor);
 }
 
+/*
+/////////////////////////////////////////////////////////////////////////////
+*/
+
+/*
+Funções de música
+*/
+void musica()
+{
+  if(tempo >= tempoNota)
+  {
+    noTone(pier);
+    tone(pier, melodia[contadorNotas], notasIntervalo);
+    tempoNota = tempo+notasIntervalo*multiplicador;
+    contadorNotas++;
+    if(contadorNotas >= sizeof(melodia)/sizeof(melodia[0]))
+    {
+      contadorNotas = 0;
+    }
+  }
+}
+/*
+////////////////////////////
+*/
+
+/*
+Funções de controle
+*/
 void resetar()
 {
   /*
@@ -345,7 +399,6 @@ void resetar()
   lcd.setCursor(x+4, 0);
   lcd.write(byte(0));
 }
-
 
 void mNave()
 {
@@ -420,7 +473,7 @@ void mAsteroide()
     {
       for(int j = 0; j <= 1; j++)
       {
-       	int frame = matrizPos[j][i];
+        int frame = matrizPos[j][i];
         if(frame > 0 && frame <= qntdFrames*2)
         {
           lcd.setCursor(i+x, j);
@@ -451,6 +504,12 @@ void mAsteroide()
     }
   }
 }
+/*
+/////////////////////////////////////////////
+*/
+
+
+
 void loop()
 {
   tempo = millis();
