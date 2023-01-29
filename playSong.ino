@@ -131,10 +131,8 @@ NOTE_D4, NOTE_E4, 0, NOTE_D4, NOTE_G3, 0, NOTE_D4, NOTE_E4, 0, NOTE_G4, NOTE_FS4
 NOTE_D4, 0, NOTE_A3, NOTE_A4, 0, NOTE_D4, NOTE_E4, 0, NOTE_D4, NOTE_A3, 0, NOTE_D4, NOTE_E4,
 0, NOTE_FS4, NOTE_D4};
 
-
-word contadorNotas = 0;
-
 //Variaveis globais de controle
+word contadorNotas = 0;
 unsigned long tempo, tempoNota = notasIntervalo;
 
 void setup()
