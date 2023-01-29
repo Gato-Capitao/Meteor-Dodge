@@ -1,4 +1,7 @@
+//pinos dos componentes
 #define pier 6
+
+//Notas que o Arduino usará para tocar
 #define NOTE_B0  31
 #define NOTE_C1  33
 #define NOTE_CS1 35
@@ -89,9 +92,8 @@
 #define NOTE_D8  4699
 #define NOTE_DS8 4978
 
+//Condigurações da música
 #define notasIntervalo 150
-
-
 
 word melodia[] = {NOTE_FS5, NOTE_CS5, NOTE_FS5, NOTE_CS5, NOTE_FS5, NOTE_CS5, NOTE_FS5, NOTE_CS5, NOTE_FS5, NOTE_CS5, NOTE_FS5, NOTE_CS5, NOTE_B4,
 NOTE_A4, NOTE_CS5, 0, NOTE_A4, NOTE_B4, NOTE_E5, NOTE_DS5, NOTE_E5, NOTE_FS5, NOTE_DS5, NOTE_B4, NOTE_FS5, NOTE_B4,
@@ -131,23 +133,33 @@ NOTE_D4, 0, NOTE_A3, NOTE_A4, 0, NOTE_D4, NOTE_E4, 0, NOTE_D4, NOTE_A3, 0, NOTE_
 
 
 word contadorNotas = 0;
+
+//Variaveis globais de controle
 unsigned long tempo, tempoNota = notasIntervalo;
 
 void setup()
 {
+  //Definir modo dos pinos
   pinMode(pier, OUTPUT);
 }
 
 void musica()
 {
+  //Verificar se já pode tocar a proxima nota
   if(tempo >= tempoNota)
   {
+    //Tocar nota
     noTone(pier);
     tone(pier, melodia[contadorNotas], notasIntervalo);
+
+    //Esperar tempo entre as notas
     tempoNota = tempo+notasIntervalo*2;
+
+    //Ir para a posição da próxima nota
     contadorNotas++;
-    if(contadorNotas >= sizeof(melodia)/sizeof(melodia[0]))
+    if(contadorNotas >= sizeof(melodia)/sizeof(melodia[0]))//Caso a música toda já foi tocada
     {
+      //Volta para o começo
       contadorNotas = 0;
     }
   }
@@ -155,5 +167,5 @@ void musica()
 void loop()
 {
   tempo = millis();
- musica();
+  musica();
 }
